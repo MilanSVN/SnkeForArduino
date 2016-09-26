@@ -1,10 +1,15 @@
 #include <Arduino_FreeRTOS.h>
+extern "C"{
+#include "game.h"
+#include "config.h"
+}
+
 
 void TaskGame( void *pvParameters );
 void TaskDisplay( void *pvParameters );
 void TaskButton( void *pvParameters );
 
-uint8_t matrix[8][8];
+//uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t direction;
 uint8_t gameOver; 
 
@@ -51,7 +56,12 @@ void TaskGame(void *pvParameters)  // This is a task.
 
   for (;;) // A Task shall never return or exit.
   {
-
+    initGame(&direction,&gameOver);
+    while(gameOver == 0)
+    {
+      runGame();
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
   }
 }
 
@@ -62,7 +72,8 @@ void TaskDisplay(void *pvParameters)  // This is a task.
 
   for (;;) // A Task shall never return or exit.
   {
-
+     
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
