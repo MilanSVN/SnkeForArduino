@@ -57,7 +57,7 @@ static uint8_t sRandom() //TODO make beter radom
 }
 
 //for SDL - in arduino directin is set externaly
-/*
+
 void setDirection(uint8_t pomDir)
 {
   if(*direction == UP && pomDir == DOWN)
@@ -78,7 +78,7 @@ void setDirection(uint8_t pomDir)
   }
   *direction = pomDir;
 }
-*/
+
 void setGameOver()
 {
   *gameOver = 1;

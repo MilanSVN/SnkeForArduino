@@ -1,5 +1,6 @@
 #include <Arduino_FreeRTOS.h>
-extern "C"{
+#include <semphr.h>
+extern "C" {
 #include "game.h"
 #include "config.h"
 }
@@ -11,32 +12,40 @@ void TaskButton( void *pvParameters );
 
 //uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t direction;
-uint8_t gameOver; 
-
+uint8_t gameOver;
+SemaphoreHandle_t directionkeeper = 0;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("setup begin");
+  directionkeeper = xSemaphoreCreateMutex();
+
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(4, INPUT);
+  pinMode(5, INPUT);
+  pinMode(13, OUTPUT);
+
   xTaskCreate(
     TaskGame
     ,  "Game"  // A name just for humans
-    ,  1024  // Stack size
+    ,  256  // Stack size
     ,  NULL
     ,  1  // priority
     ,  NULL );
 
-   xTaskCreate(
+  xTaskCreate(
     TaskDisplay
     ,  "Display"  // A name just for humans
-    ,  512  // Stack size
+    ,  256  // Stack size
     ,  NULL
     ,  1  // priority
     ,  NULL );
 
-   xTaskCreate(
+  xTaskCreate(
     TaskButton
-    ,  "Button"  
-    ,  512  // Stack size
+    ,  "Button"
+    ,  256  // Stack size
     ,  NULL
     ,  1  // priority
     ,  NULL );
@@ -54,71 +63,127 @@ void loop()
 void TaskGame(void *pvParameters)  // This is a task.
 {
   Serial.println("TaskGame started");
- 
+
 
   for (;;) // A Task shall never return or exit.
   {
-    /*
-    initGame(&direction,&gameOver);
-    while(gameOver == 0)
+
+    initGame(&direction, &gameOver);
+    while (gameOver == 0)
     {
-      runGame();
-      vTaskDelay(100 / portTICK_PERIOD_MS);
+      if (xSemaphoreTake(directionkeeper, 500))
+      {
+        runGame();
+        xSemaphoreGive(directionkeeper);
+      }
+      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
-    */
   }
 }
 
 void TaskDisplay(void *pvParameters)  // This is a task.
 {
   Serial.println("TaskDisplay started");
- 
+
 
   for (;;) // A Task shall never return or exit.
   {
-    /*
-    //debugShowDisply(matrix); 
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-    */
+
+    debugShowDisply(matrix);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+
   }
 }
 
 void TaskButton(void *pvParameters)  // This is a task.
 {
   Serial.println("TaskGame started");
- 
+  const int buttonRight = 2;
+  const int buttonUp = 3;
+  const int buttonLeft = 4;
+  const int buttonDown = 5;
+
+  const int signalLed = 13;
+
+
+  setDirection(UP);
 
   for (;;) // A Task shall never return or exit.
   {
-    /*
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
-    */
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    digitalWrite(signalLed, LOW);
+    if (xSemaphoreTake(directionkeeper, 500))
+    {
+        if (digitalRead(buttonRight) == HIGH)
+        {
+            setDirection(RIGHT);
+            //direction = RIGHT;
+            digitalWrite(signalLed, HIGH);
+            Serial.println("RIGHT");
+            Serial.println(direction);
+        }
+        
+        else if (digitalRead(buttonUp) == HIGH)
+        {
+              setDirection(UP);
+              //direction = UP;
+              digitalWrite(signalLed, HIGH);
+              Serial.println("UP");
+              Serial.println(direction);
+        }
+        
+        else if (digitalRead(buttonLeft) == HIGH)
+        {
+            setDirection(LEFT);
+            digitalWrite(signalLed, HIGH);
+            Serial.println("LEFT");
+            Serial.println(direction);
+        }
+        
+        else if (digitalRead(buttonDown) == HIGH)
+        {
+            setDirection(DOWN);
+            digitalWrite(signalLed, HIGH);
+            Serial.println("DOWN");
+            Serial.println(direction);
+        }
+        
+    xSemaphoreGive(directionkeeper);
+    }    
   }
 }
 
-/*
+
 static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
 {
   uint8_t i = 0;
   uint8_t j = 0;
-  Serial.write(12);//clearScreen
-  for(i = 0; i < PLAYGROUND_Y; i++)
+  //Serial.write(13);//clearScreen
+
+  Serial.write(27);       // ESC command
+  Serial.print("[2J");    // clear screen command
+  Serial.write(27);
+  Serial.print("[H");     // cursor to home command
+
+  for (i = 0; i < PLAYGROUND_Y; i++)
   {
-    for(j = 0; j < PLAYGROUND_X; j++)
+
+    for (j = 0; j < PLAYGROUND_X; j++)
+    {
+      Serial.print("  ");
+      switch (arg[i][j])
       {
-        switch (arg[i][j]) 
-        {
-          case 0:
-            Serial.print("0");
-            break;
-          case 1:
-            Serial.print("8");
-            break;
-          default: 
-            Serial.print("x");
+        case 0:
+          Serial.print("0");
           break;
-        }
+        case 1:
+          Serial.print("8");
+          break;
+        default:
+          Serial.print("x");
+          break;
       }
-      Serial.println();
-  }  
-}*/
+    }
+    Serial.println();
+  }
+}
