@@ -6,7 +6,7 @@
  */
 
 #include "game.h"
-
+#include "config.h"
 
 
 static void moveHead();
@@ -27,8 +27,8 @@ static POSITION rect;//pozicija od koje pocinje crtanje
 uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t height;
 uint8_t width;
-uint8_t volatile* direction;
-uint8_t volatile* gameOver;
+uint8_t direction = RIGHT;
+uint8_t* gameOver;
 //uint8_t pomDirection;
 
 POSITION head;
@@ -51,7 +51,7 @@ static void putFood()
 
 static uint8_t sRandom() //TODO make beter radom
 {
-  uint8_t z;
+  static uint8_t z = 1;
   z = (9 * z + 3) % 127;
   return z;
 }
@@ -60,23 +60,23 @@ static uint8_t sRandom() //TODO make beter radom
 
 void setDirection(uint8_t pomDir)
 {
-  if(*direction == UP && pomDir == DOWN)
+  if(direction == UP && pomDir == DOWN)
   {
     return;
   }
-  if(*direction == DOWN && pomDir == UP)
+  if(direction == DOWN && pomDir == UP)
   {
     return;
   }
-  if(*direction == LEFT && pomDir == RIGHT)
+  if(direction == LEFT && pomDir == RIGHT)
   {
     return;
   }
-  if(*direction == RIGHT && pomDir == LEFT)
+  if(direction == RIGHT && pomDir == LEFT)
   {
     return;
   }
-  *direction = pomDir;
+  direction = pomDir;
 }
 
 void setGameOver()
@@ -90,7 +90,7 @@ static void moveHead()
   uint8_t newPos = matrix[head.y][head.x];
   if(newPos == 0)
   {
-	matrix[head.y][head.x] = *direction;
+	matrix[head.y][head.x] = direction;
     //rect.x = head.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
     //rect.y = head.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
     //drawSnake(rect); //SDL function
@@ -98,9 +98,12 @@ static void moveHead()
   }
   else if(newPos == FOOD)
   {
+    
+ matrix[head.y][head.x] = direction;
    //rect.x = head.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
     //rect.y = head.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
     //drawSnake(rect);
+      //  moveTail();
     putFood();
     //scorepp();//TODO set score
   }
@@ -147,12 +150,12 @@ static void moveTail()
 uint8_t initGame(uint8_t* dire, uint8_t* gO)
 {
 //	matrix = arg;
-	direction = dire;
+	direction = *dire;
 	gameOver = gO;
   height = PLAYGROUND_Y / SNAKE_Y;
   width = PLAYGROUND_X / SNAKE_X;
   
-  *direction = RIGHT;
+  direction = RIGHT;
   *gameOver = 0;
   
   uint8_t i;
@@ -192,13 +195,13 @@ void runGame(void)
   //{
     //handleUserCommands();for SDL
 	//for arduiono directin is set externaly
-    if(*direction == DOWN)
+    if(direction == DOWN)
     {
       matrix[head.y][head.x] = DOWN;
       head.y = (head.y + 1) % (height);
       moveHead();
     }
-    else if (*direction == UP)
+    else if (direction == UP)
     {
       matrix[head.y][head.x] = UP;
       head.y--;
@@ -208,7 +211,7 @@ void runGame(void)
       }
       moveHead();      
     }
-    else if (*direction == LEFT)
+    else if (direction == LEFT)
     {
       matrix[head.y][head.x] = LEFT;
       head.x--;
@@ -218,7 +221,7 @@ void runGame(void)
       }
       moveHead(); 
     }
-    else if (*direction == RIGHT)
+    else if (direction == RIGHT)
     {
       matrix[head.y][head.x] = RIGHT;
       head.x = (head.x + 1) % (width);

@@ -11,8 +11,8 @@ void TaskDisplay( void *pvParameters );
 void TaskButton( void *pvParameters );
 
 //uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
-uint8_t direction;
-uint8_t gameOver;
+//uint8_t direction;
+//uint8_t gameOver;
 SemaphoreHandle_t directionkeeper = 0;
 
 void setup() {
@@ -68,7 +68,7 @@ void TaskGame(void *pvParameters)  // This is a task.
   for (;;) // A Task shall never return or exit.
   {
 
-    initGame(&direction, &gameOver);
+    initGame(&direction,gameOver);
     while (gameOver == 0)
     {
       if (xSemaphoreTake(directionkeeper, 500))
