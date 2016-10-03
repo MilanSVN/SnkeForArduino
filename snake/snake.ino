@@ -10,9 +10,6 @@ void TaskGame( void *pvParameters );
 void TaskDisplay( void *pvParameters );
 void TaskButton( void *pvParameters );
 
-//uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
-//uint8_t direction;
-//uint8_t gameOver;
 SemaphoreHandle_t directionkeeper = 0;
 
 void setup() {
@@ -68,7 +65,7 @@ void TaskGame(void *pvParameters)  // This is a task.
   for (;;) // A Task shall never return or exit.
   {
 
-    initGame(&direction,gameOver);
+    initGame();
     while (gameOver == 0)
     {
       if (xSemaphoreTake(directionkeeper, 500))
@@ -76,8 +73,9 @@ void TaskGame(void *pvParameters)  // This is a task.
         runGame();
         xSemaphoreGive(directionkeeper);
       }
-      vTaskDelay(500 / portTICK_PERIOD_MS);
+      vTaskDelay(600 / portTICK_PERIOD_MS);
     }
+    
   }
 }
 
@@ -90,7 +88,7 @@ void TaskDisplay(void *pvParameters)  // This is a task.
   {
 
     debugShowDisply(matrix);
-    vTaskDelay(200 / portTICK_PERIOD_MS);
+    vTaskDelay(300 / portTICK_PERIOD_MS);
 
   }
 }
@@ -165,6 +163,9 @@ static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
   Serial.write(27);
   Serial.print("[H");     // cursor to home command
 
+  if(gameOver){
+    Serial.print("GAME OVER");
+  }else{
   for (i = 0; i < PLAYGROUND_Y; i++)
   {
 
@@ -185,5 +186,6 @@ static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
       }
     }
     Serial.println();
+  }
   }
 }

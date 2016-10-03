@@ -1,34 +1,28 @@
 /**
- * @file Game.c
- * @brief Document contains short description of used structures and functions 
- * @author RT-RK Snake
- * @date Oktober, 2015
- */
+   @file Game.c
+   @brief Document contains short description of used structures and functions
+   @author RT-RK Snake
+   @date Oktober, 2015
+*/
 
 #include "game.h"
 #include "config.h"
-
+#include "score.h"
 
 static void moveHead();
 static void moveTail();
 static uint8_t sRandom();
 static void putFood();
+static void drawScore();
 
-
-//static SDL_Rect rect;
 static POSITION rect;//pozicija od koje pocinje crtanje
 
-//static SDL_Surface* background = NULL;
-//static SDL_Surface* playgound = NULL;
-//static SDL_Surface* snake = NULL; 
-//static SDL_Surface* delSnake = NULL; 
-///////static SDL_Surface* screen = NULL;
-
+uint8_t score;
 uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t height;
 uint8_t width;
 uint8_t direction = RIGHT;
-uint8_t* gameOver;
+uint8_t gameOver;
 //uint8_t pomDirection;
 
 POSITION head;
@@ -38,15 +32,16 @@ static void putFood()
 {
   uint8_t fX = sRandom() % width;
   uint8_t fY = sRandom() % height;
-  while(matrix[fY][fX] != 0)
+  while (matrix[fY][fX] != 0)
   {
     fX = sRandom() % width;
     fY = sRandom() % height;
   }
   matrix[fY][fX] = FOOD; //u arduiono verziji se matrica direktno iscrtava
-  //rect.x = fX * SNAKE_X + INIT_OFFSET_PLAYGROUND_X; //nije potrebno u verziji za ARDUINO
-  //rect.y = fY * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y; //koristi se samo za SDL za proporcije 
-  //drawFood(rect);
+}
+
+static void incrementScore() {
+  score++;
 }
 
 static uint8_t sRandom() //TODO make beter radom
@@ -60,104 +55,94 @@ static uint8_t sRandom() //TODO make beter radom
 
 void setDirection(uint8_t pomDir)
 {
-  if(direction == UP && pomDir == DOWN)
+  if (direction == UP && pomDir == DOWN)
   {
     return;
   }
-  if(direction == DOWN && pomDir == UP)
+  if (direction == DOWN && pomDir == UP)
   {
     return;
   }
-  if(direction == LEFT && pomDir == RIGHT)
+  if (direction == LEFT && pomDir == RIGHT)
   {
     return;
   }
-  if(direction == RIGHT && pomDir == LEFT)
+  if (direction == RIGHT && pomDir == LEFT)
   {
     return;
   }
   direction = pomDir;
 }
 
-void setGameOver()
+void setGameOver(void)
 {
-  *gameOver = 1;
+  gameOver = 1;
   //TODO add showScore()
 }
 
 static void moveHead()
 {
   uint8_t newPos = matrix[head.y][head.x];
-  if(newPos == 0)
+  if (newPos > 1 && newPos < 5)
   {
-	matrix[head.y][head.x] = direction;
-    //rect.x = head.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
-    //rect.y = head.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
-    //drawSnake(rect); //SDL function
+    gameOver = 1;
+  } else if (newPos == 0)
+  {
+    matrix[head.y][head.x] = direction;
     moveTail();
   }
-  else if(newPos == FOOD)
+  else if (newPos == FOOD)
   {
-    
- matrix[head.y][head.x] = direction;
-   //rect.x = head.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
-    //rect.y = head.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
-    //drawSnake(rect);
-      //  moveTail();
+    incrementScore();
+    matrix[head.y][head.x] = direction;
     putFood();
     //scorepp();//TODO set score
-  }
-  else if(newPos > 1)
-  {
-    *gameOver = 1;
   }
 }
 
 static void moveTail()
 {
-  //rect.x = tail.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
-  //rect.y = tail.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
-  //unDrowSnake(rect);//for SDL
   uint8_t tailDirection = matrix[tail.y][tail.x];
   matrix[tail.y][tail.x] = 0;
-  if(tailDirection == DOWN)
+  if (tailDirection == DOWN)
   {
     tail.y = (tail.y + 1) % (height);
   }
-  else if(tailDirection == UP)
-  { 
-    tail.y--;
-    if(tail.y <= 0)
+  else if (tailDirection == UP)
+  {
+
+    if (tail.y <= 0)
     {
       tail.y = height - 1;
+    } else {
+      tail.y--;
     }
   }
-  else if(tailDirection == LEFT)
+  else if (tailDirection == LEFT)
   {
-    tail.x--;
-    if(tail.x <= 0)
+    if (tail.x <= 0)
     {
       tail.x = width - 1;
+    } else {
+      tail.x--;
     }
   }
-  else if(tailDirection == RIGHT)
+  else if (tailDirection == RIGHT)
   {
     tail.x = (tail.x + 1) % (width);
   }
-  
+
 }
 
-uint8_t initGame(uint8_t* dire, uint8_t* gO)
+uint8_t initGame(void)
 {
-//	matrix = arg;
-	direction = *dire;
-	gameOver = gO;
   height = PLAYGROUND_Y / SNAKE_Y;
   width = PLAYGROUND_X / SNAKE_X;
-  
+  score = 1;
+
   direction = RIGHT;
-  *gameOver = 0;
-  
+  gameOver = 0;
+
   uint8_t i;
   uint8_t j;
   for (i = 0; i < height; i++)
@@ -168,69 +153,265 @@ uint8_t initGame(uint8_t* dire, uint8_t* gO)
     }
   }
 
-  // rect.x = INIT_OFFSET_PLAYGROUND_X;//for SDL
-  // rect.y = INIT_OFFSET_PLAYGROUND_Y;
-  // drawPlayground(rect);
-
   tail.y = height / 2;
   tail.x = width / 2;
   head.y = height / 2;
   head.x = width / 2;
   matrix[tail.y][tail.x] = RIGHT;
-  //rect.x = head.x * SNAKE_X + INIT_OFFSET_PLAYGROUND_X;
-  //rect.y = head.y * SNAKE_Y + INIT_OFFSET_PLAYGROUND_Y;
-  //drawSnake(rect);
-  
+
   putFood();
- 
+
   return 0;
-  
+
 }
 
 
 
 void runGame(void)
 {
-  //while(*gameOver == 0)//for SDL
-  //{
-    //handleUserCommands();for SDL
-	//for arduiono directin is set externaly
-    if(direction == DOWN)
+  //for arduiono directin is set externaly
+  if (direction == DOWN)
+  {
+    matrix[head.y][head.x] = DOWN;
+    head.y = (head.y + 1) % (height);
+    moveHead();
+  }
+  else if (direction == UP)
+  {
+    matrix[head.y][head.x] = UP;
+    if (head.y <= 0)
     {
-      matrix[head.y][head.x] = DOWN;
-      head.y = (head.y + 1) % (height);
-      moveHead();
+      head.y = height - 1;
     }
-    else if (direction == UP)
-    {
-      matrix[head.y][head.x] = UP;
+    else {
       head.y--;
-      if(head.y <= 0) 
-      {
-		head.y = height - 1;
-      }
-      moveHead();      
     }
-    else if (direction == LEFT)
+    moveHead();
+  }
+  else if (direction == LEFT)
+  {
+    matrix[head.y][head.x] = LEFT;
+    if (head.x <= 0)
     {
-      matrix[head.y][head.x] = LEFT;
+      head.x = width - 1;
+    } else {
       head.x--;
-      if(head.x <= 0) 
+    }
+    moveHead();
+  }
+  else if (direction == RIGHT)
+  {
+    matrix[head.y][head.x] = RIGHT;
+    head.x = (head.x + 1) % (width);
+    moveHead();
+  }
+}
+
+static void drawScore()
+{
+  uint8_t s1;
+  uint8_t s2;
+  uint8_t i;
+  uint8_t j;
+  s1 = score / 10;
+  s2 = score % 10;
+
+  switch (s1) {
+    case 0:
+      for (i = 0; i < 8; i++)
       {
-		head.x = width - 1;
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = nula[i][j];
+        }
       }
-      moveHead(); 
-    }
-    else if (direction == RIGHT)
+      break;
+    case 1:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = jedan[i][j];
+        }
+      }
+      break;
+    case 2:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = dva[i][j];
+        }
+      }
+      break;
+    case 3:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = tri[i][j];
+        }
+      }
+      break;
+    case 4:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = cetiri[i][j];
+        }
+      }
+      break;
+    case 5:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = pet[i][j];
+        }
+      }
+      break;
+    case 6:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = sest[i][j];
+        }
+      }
+      break;
+    case 7:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = sedam[i][j];
+        }
+      }
+      break;
+    case 8:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = osam[i][j];
+        }
+      }
+      break;
+    case 9:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j] = devet[i][j];
+        }
+      }
+      break;
+  }
+  
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 3; j < 5; j++)
     {
-      matrix[head.y][head.x] = RIGHT;
-      head.x = (head.x + 1) % (width);
-      moveHead();      
+      matrix[i][j] = 0;
     }
-    //gameOver = 1; //< For test 3,4,5,6,7
-    
-    
-  //}
+  }
+
+
+  switch (s2) {
+    case 0:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = nula[i][j];
+        }
+      }
+      break;
+    case 1:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = jedan[i][j];
+        }
+      }
+      break;
+    case 2:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = dva[i][j];
+        }
+      }
+      break;
+    case 3:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = tri[i][j];
+        }
+      }
+      break;
+    case 4:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = cetiri[i][j];
+        }
+      }
+      break;
+    case 5:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = pet[i][j];
+        }
+      }
+      break;
+    case 6:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = sest[i][j];
+        }
+      }
+      break;
+    case 7:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = sedam[i][j];
+        }
+      }
+      break;
+    case 8:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = osam[i][j];
+        }
+      }
+      break;
+    case 9:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 3; j++)
+        {
+          matrix[i][j + 5] = devet[i][j];
+        }
+      }
+      break;
+  }
+
+
 }
 
 

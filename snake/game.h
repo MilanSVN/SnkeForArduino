@@ -3,10 +3,11 @@
 #include <stdint.h>
 #include "config.h"
 
+extern uint8_t score;
 extern uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 extern uint8_t direction;
-extern uint8_t* gameOver;
-uint8_t initGame(uint8_t *dire, uint8_t *gO);
+extern uint8_t gameOver;
+uint8_t initGame(void);
 void runGame(void);
 
 void setGameOver(void);
