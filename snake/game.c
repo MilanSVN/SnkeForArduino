@@ -13,7 +13,7 @@ static void moveHead();
 static void moveTail();
 static uint8_t sRandom();
 static void putFood();
-static void drawScore();
+void drawScore();
 
 static POSITION rect;//pozicija od koje pocinje crtanje
 
@@ -83,20 +83,21 @@ void setGameOver(void)
 static void moveHead()
 {
   uint8_t newPos = matrix[head.y][head.x];
-  if (newPos > 1 && newPos < 5)
-  {
-    gameOver = 1;
-  } else if (newPos == 0)
-  {
-    matrix[head.y][head.x] = direction;
-    moveTail();
-  }
-  else if (newPos == FOOD)
+  if (newPos == FOOD)
   {
     incrementScore();
     matrix[head.y][head.x] = direction;
     putFood();
-    //scorepp();//TODO set score
+  }
+  else {
+    moveTail();
+  if (newPos == 0) {
+    matrix[head.y][head.x] = direction;
+  }
+  else if (newPos > 1 && newPos < 5)
+  {
+    setGameOver();
+  }
   }
 }
 
@@ -170,6 +171,7 @@ uint8_t initGame(void)
 void runGame(void)
 {
   //for arduiono directin is set externaly
+
   if (direction == DOWN)
   {
     matrix[head.y][head.x] = DOWN;
@@ -207,7 +209,7 @@ void runGame(void)
   }
 }
 
-static void drawScore()
+void drawScore()
 {
   uint8_t s1;
   uint8_t s2;
@@ -307,11 +309,19 @@ static void drawScore()
         }
       }
       break;
-  }
-  
+    default:
       for (i = 0; i < 8; i++)
       {
-        for (j = 3; j < 5; j++)
+        for (j = 0; j < 8; j++)
+        {
+          matrix[i][j] = 0;
+        }
+      }
+  }
+
+  for (i = 0; i < 8; i++)
+  {
+    for (j = 3; j < 5; j++)
     {
       matrix[i][j] = 0;
     }
@@ -409,6 +419,14 @@ static void drawScore()
         }
       }
       break;
+    default:
+      for (i = 0; i < 8; i++)
+      {
+        for (j = 0; j < 8; j++)
+        {
+          matrix[i][j] = 0;
+        }
+      }
   }
 
 

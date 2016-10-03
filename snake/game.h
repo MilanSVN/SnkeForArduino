@@ -9,7 +9,7 @@ extern uint8_t direction;
 extern uint8_t gameOver;
 uint8_t initGame(void);
 void runGame(void);
-
+void drawScore();
 void setGameOver(void);
 void setDirection(uint8_t pomDir);//for SDL
 

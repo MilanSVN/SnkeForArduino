@@ -3,6 +3,7 @@
 extern "C" {
 #include "game.h"
 #include "config.h"
+//#include "score.h"
 }
 
 static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X]);
@@ -42,7 +43,7 @@ void setup() {
   xTaskCreate(
     TaskButton
     ,  "Button"
-    ,  256  // Stack size
+    ,  66  // Stack size
     ,  NULL
     ,  1  // priority
     ,  NULL );
@@ -75,6 +76,8 @@ void TaskGame(void *pvParameters)  // This is a task.
       }
       vTaskDelay(600 / portTICK_PERIOD_MS);
     }
+    drawScore();
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
     
   }
 }
@@ -163,9 +166,7 @@ static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
   Serial.write(27);
   Serial.print("[H");     // cursor to home command
 
-  if(gameOver){
-    Serial.print("GAME OVER");
-  }else{
+
   for (i = 0; i < PLAYGROUND_Y; i++)
   {
 
@@ -187,5 +188,5 @@ static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
     }
     Serial.println();
   }
-  }
+  
 }
