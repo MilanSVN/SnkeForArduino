@@ -21,7 +21,8 @@ uint8_t score;
 uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t height;
 uint8_t width;
-uint8_t direction;
+uint8_t globalna;
+static uint8_t direction;
 uint8_t gameOver;
 //uint8_t pomDirection;
 
@@ -52,7 +53,10 @@ static uint8_t sRandom() //TODO make beter radom
 }
 
 //for SDL - in arduino directin is set externaly
-
+uint8_t getDirection()
+{
+	return direction;
+}
 void setDirection(uint8_t pomDir)
 {
   if (direction == UP && pomDir == DOWN)
@@ -105,34 +109,31 @@ static void moveTail()
 {
   uint8_t tailDirection = matrix[tail.y][tail.x];
   matrix[tail.y][tail.x] = 0;
-  if (tailDirection == DOWN)
+  if(tailDirection == DOWN)
   {
     tail.y = (tail.y + 1) % (height);
   }
-  else if (tailDirection == UP)
-  {
-
-    if (tail.y <= 0)
+  else if(tailDirection == UP)
+  { 
+    tail.y--;
+    if(tail.y <= 0)
     {
       tail.y = height - 1;
-    } else {
-      tail.y--;
     }
   }
-  else if (tailDirection == LEFT)
+  else if(tailDirection == LEFT)
   {
-    if (tail.x <= 0)
+    tail.x--;
+    if(tail.x <= 0)
     {
       tail.x = width - 1;
-    } else {
-      tail.x--;
     }
   }
-  else if (tailDirection == RIGHT)
+  else if(tailDirection == RIGHT)
   {
     tail.x = (tail.x + 1) % (width);
   }
-
+  
 }
 
 uint8_t initGame(void)
@@ -155,9 +156,9 @@ uint8_t initGame(void)
   }
 
   tail.y = height / 2;
-  tail.x = (width / 2) - 1;
+  tail.x = (width / 2);
   head.y = height / 2;
-  head.x = width / 2;
+  head.x = (width / 2) + 1;
   matrix[tail.y][tail.x] = RIGHT;
 
   putFood();
@@ -166,47 +167,46 @@ uint8_t initGame(void)
 
 }
 
-
-
 void runGame(void)
 {
-  //for arduiono directin is set externaly
+	globalna = direction;
 
-  if (direction == DOWN)
-  {
-    matrix[head.y][head.x] = DOWN;
-    head.y = (head.y + 1) % (height);
-    moveHead();
-  }
-  else if (direction == UP)
-  {
-    matrix[head.y][head.x] = UP;
-    if (head.y <= 0)
+    if(direction == DOWN)
     {
-      head.y = height - 1;
+      matrix[head.y][head.x] = DOWN;
+      head.y = (head.y + 1) % (height);
+      moveHead();
     }
-    else {
+    else if (direction == UP)
+    {
+      matrix[head.y][head.x] = UP;
       head.y--;
+      if(head.y <= 0) 
+      {
+		head.y = height - 1;
+      }
+      moveHead();      
     }
-    moveHead();
-  }
-  else if (direction == LEFT)
-  {
-    matrix[head.y][head.x] = LEFT;
-    if (head.x <= 0)
+    else if (direction == LEFT)
     {
-      head.x = width - 1;
-    } else {
+      matrix[head.y][head.x] = LEFT;
       head.x--;
+      if(head.x <= 0) 
+      {
+		head.x = width - 1;
+      }
+      moveHead(); 
     }
-    moveHead();
-  }
-  else //if  (direction == RIGHT)
-  {
-    matrix[head.y][head.x] = RIGHT;
-    head.x = (head.x + 1) % (width);
-    moveHead();
-  }
+    else if (direction == RIGHT)
+    {
+      matrix[head.y][head.x] = RIGHT;
+      head.x = (head.x + 1) % (width);
+      moveHead();      
+    }
+
+    
+    
+  
 }
 
 void drawScore()

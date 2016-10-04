@@ -3,14 +3,14 @@
 extern "C" {
 #include "game.h"
 #include "config.h"
-#include "driver.h"
+//#include "driver.h"
 //#include "score.h"
 }
 
 extern uint8_t score;
 extern uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
-extern uint8_t direction;
 extern uint8_t gameOver;
+extern uint8_t globalna;
 
 static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X]);
 void TaskGame( void *pvParameters );
@@ -97,7 +97,7 @@ void TaskDisplay(void *pvParameters)  // This is a task.
   {
 
     debugShowDisply(matrix);
-	showScreean(matrix);
+	//showScreean(matrix);
     vTaskDelay(300 / portTICK_PERIOD_MS);
 
   }
@@ -125,19 +125,16 @@ void TaskButton(void *pvParameters)  // This is a task.
         if (digitalRead(buttonRight) == HIGH)
         {
             setDirection(RIGHT);
-            //direction = RIGHT;
-            digitalWrite(signalLed, HIGH);
             Serial.println("RIGHT");
-            Serial.println(direction);
+            Serial.println(getDirection());
         }
         
         else if (digitalRead(buttonUp) == HIGH)
         {
               setDirection(UP);
-              //direction = UP;
-              digitalWrite(signalLed, HIGH);
+
               Serial.println("UP");
-              Serial.println(direction);
+              Serial.println(getDirection());
         }
         
         else if (digitalRead(buttonLeft) == HIGH)
@@ -145,7 +142,7 @@ void TaskButton(void *pvParameters)  // This is a task.
             setDirection(LEFT);
             digitalWrite(signalLed, HIGH);
             Serial.println("LEFT");
-            Serial.println(direction);
+            Serial.println(getDirection());
         }
         
         else if (digitalRead(buttonDown) == HIGH)
@@ -153,7 +150,7 @@ void TaskButton(void *pvParameters)  // This is a task.
             setDirection(DOWN);
             digitalWrite(signalLed, HIGH);
             Serial.println("DOWN");
-            Serial.println(direction);
+            Serial.println(getDirection());
         }
         
 		xSemaphoreGive(directionkeeper);
@@ -195,5 +192,9 @@ static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X])
     }
     Serial.println();
   }
+  Serial.println(getDirection());
+  
+  Serial.println(globalna);
   
 }
+

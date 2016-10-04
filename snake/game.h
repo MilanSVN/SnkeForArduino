@@ -9,6 +9,7 @@ void runGame(void);
 void drawScore();
 void setGameOver(void);
 void setDirection(uint8_t pomDir);//for SDL
+uint8_t getDirection();
 
 
 #endif
