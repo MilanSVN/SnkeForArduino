@@ -21,7 +21,7 @@ uint8_t score;
 uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
 uint8_t height;
 uint8_t width;
-uint8_t direction = RIGHT;
+uint8_t direction;
 uint8_t gameOver;
 //uint8_t pomDirection;
 
@@ -86,13 +86,13 @@ static void moveHead()
   if (newPos == FOOD)
   {
     incrementScore();
-    matrix[head.y][head.x] = direction;
+    //matrix[head.y][head.x] = direction;
     putFood();
   }
   else {
     moveTail();
   if (newPos == 0) {
-    matrix[head.y][head.x] = direction;
+    //matrix[head.y][head.x] = direction;
   }
   else if (newPos > 1 && newPos < 5)
   {
@@ -155,7 +155,7 @@ uint8_t initGame(void)
   }
 
   tail.y = height / 2;
-  tail.x = width / 2;
+  tail.x = (width / 2) - 1;
   head.y = height / 2;
   head.x = width / 2;
   matrix[tail.y][tail.x] = RIGHT;
@@ -201,7 +201,7 @@ void runGame(void)
     }
     moveHead();
   }
-  else if (direction == RIGHT)
+  else //if  (direction == RIGHT)
   {
     matrix[head.y][head.x] = RIGHT;
     head.x = (head.x + 1) % (width);

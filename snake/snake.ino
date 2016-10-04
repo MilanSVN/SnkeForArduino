@@ -3,8 +3,14 @@
 extern "C" {
 #include "game.h"
 #include "config.h"
+#include "driver.h"
 //#include "score.h"
 }
+
+extern uint8_t score;
+extern uint8_t matrix[PLAYGROUND_Y][PLAYGROUND_X];
+extern uint8_t direction;
+extern uint8_t gameOver;
 
 static void debugShowDisply(uint8_t arg[PLAYGROUND_Y][PLAYGROUND_X]);
 void TaskGame( void *pvParameters );
@@ -91,6 +97,7 @@ void TaskDisplay(void *pvParameters)  // This is a task.
   {
 
     debugShowDisply(matrix);
+	showScreean(matrix);
     vTaskDelay(300 / portTICK_PERIOD_MS);
 
   }
@@ -149,7 +156,7 @@ void TaskButton(void *pvParameters)  // This is a task.
             Serial.println(direction);
         }
         
-    xSemaphoreGive(directionkeeper);
+		xSemaphoreGive(directionkeeper);
     }    
   }
 }
