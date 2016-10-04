@@ -18,10 +18,10 @@ void setup() {
   Serial.println("setup begin");
   directionkeeper = xSemaphoreCreateMutex();
 
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
-  pinMode(4, INPUT);
-  pinMode(5, INPUT);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
   pinMode(13, OUTPUT);
 
   xTaskCreate(
@@ -99,10 +99,10 @@ void TaskDisplay(void *pvParameters)  // This is a task.
 void TaskButton(void *pvParameters)  // This is a task.
 {
   Serial.println("TaskGame started");
-  const int buttonRight = 2;
-  const int buttonUp = 3;
-  const int buttonLeft = 4;
-  const int buttonDown = 5;
+  const int buttonRight = A0;
+  const int buttonUp = A1;
+  const int buttonLeft = A2;
+  const int buttonDown = A3;
 
   const int signalLed = 13;
 
